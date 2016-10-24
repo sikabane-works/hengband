@@ -193,6 +193,8 @@
 
 #define IDM_DUMP_SCREEN_HTML	450
 
+#define IDM_OPTIONS_NEW_GRAPHICS_MODE	460
+
 #define IDM_HELP_CONTENTS       901
 
 
@@ -493,6 +495,8 @@ static HPALETTE hPal;
 static HBITMAP hBG = NULL;
 static int use_bg = 0;
 static char bg_bitmap_file[1024] = "bg.bmp";
+
+static int use_new_gmode = 0;
 
 #ifdef USE_SAVER
 
@@ -3705,6 +3709,9 @@ static void setup_menus(void)
 		      (arg_sound ? MF_CHECKED : MF_UNCHECKED));
 	CheckMenuItem(hm, IDM_OPTIONS_BG,
 		      (use_bg ? MF_CHECKED : MF_UNCHECKED));
+	CheckMenuItem(hm, IDM_OPTIONS_NEW_GRAPHICS_MODE,
+		      (use_new_gmode ? MF_CHECKED : MF_UNCHECKED));
+
 #ifndef JP
 	CheckMenuItem(hm, IDM_OPTIONS_SAVER,
 		      (hwndSaver ? MF_CHECKED : MF_UNCHECKED));
@@ -4307,6 +4314,12 @@ static void process_menus(WORD wCmd)
 			/* Redraw later */
 			InvalidateRect(td->w, NULL, TRUE);
 
+			break;
+		}
+
+		case IDM_OPTIONS_NEW_GRAPHICS_MODE:
+		{
+			use_new_gmode = !use_new_gmode;
 			break;
 		}
 

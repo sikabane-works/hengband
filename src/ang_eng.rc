@@ -129,6 +129,7 @@ ANGBAND MENU
 		MENUITEM "&Back ground pict", 440
 		MENUITEM "Choose BG pict", 441
 		MENUITEM "&HTML dump", 450
+		MENUITEM "New graphics mode(alpha)", 460
 	}
 
 /*
