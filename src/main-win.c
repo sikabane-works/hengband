@@ -79,6 +79,9 @@
 #include <direct.h>
 #include <locale.h>
 #include "z-term.h"
+#include <png.h>
+#include <pngstruct.h>
+#include <pnginfo.h>
 
 /*
  * Extract the "WIN32" flag from the compiler
@@ -4320,6 +4323,25 @@ static void process_menus(WORD wCmd)
 		case IDM_OPTIONS_NEW_GRAPHICS_MODE:
 		{
 			use_new_gmode = !use_new_gmode;
+
+			/* Paranoia */
+			if (!inkey_flag)
+			{
+				plog("You may not do that right now.");
+				break;
+			}
+
+			/* Toggle "arg_graphics" */
+			if (arg_graphics != GRAPHICS_HENGBAND)
+			{
+				arg_graphics = GRAPHICS_HENGBAND;
+
+				/* React to changes */
+				Term_xtra_win_react();
+
+				/* Hack -- Force redraw */
+				Term_key_push(KTRL('R'));
+			}
 			break;
 		}
 
