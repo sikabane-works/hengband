@@ -79,9 +79,6 @@
 #include <direct.h>
 #include <locale.h>
 #include "z-term.h"
-#include <png.h>
-#include <pngstruct.h>
-#include <pnginfo.h>
 
 /*
  * Extract the "WIN32" flag from the compiler
