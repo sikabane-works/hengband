@@ -70,12 +70,12 @@ static BUF* buf_new(void)
 {
 	BUF *p;
 
-	if ((p = malloc(sizeof(BUF))) == NULL)
+	if ((p = (BUF *)malloc(sizeof(BUF))) == NULL)
 		return NULL;
 
 	p->size = 0;
 	p->max_size = BUFSIZE;
-	if ((p->data = malloc(BUFSIZE)) == NULL)
+	if ((p->data = (char *)malloc(BUFSIZE)) == NULL)
 	{
 		free(p);
 		return NULL;
@@ -105,7 +105,7 @@ static int buf_append(BUF *buf, const char *data, size_t size)
 	while (buf->size + size > buf->max_size)
 	{
 		char *tmp;
-		if ((tmp = malloc(buf->max_size * 2)) == NULL) return -1;
+		if ((tmp = (char *)malloc(buf->max_size * 2)) == NULL) return -1;
 
 		memcpy(tmp, buf->data, buf->max_size);
 		free(buf->data);

@@ -79,6 +79,7 @@
 #include <direct.h>
 #include <locale.h>
 #include "z-term.h"
+#include "png-util.h"
 
 /*
  * Extract the "WIN32" flag from the compiler
@@ -583,7 +584,6 @@ static cptr AngList = "AngList";
  */
 static cptr ANGBAND_DIR_XTRA_GRAF;
 static cptr ANGBAND_DIR_XTRA_SOUND;
-static cptr ANGBAND_DIR_XTRA_MUSIC;
 static cptr ANGBAND_DIR_XTRA_HELP;
 #if 0 /* #ifndef JP */
 static cptr ANGBAND_DIR_XTRA_FONT;
@@ -779,7 +779,7 @@ static int init_bg(void)
 	delete_bg();
 	if (use_bg == 0) return 0;
 
-	hBG = LoadImage(NULL, bmfile,  IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	hBG = (HBITMAP)LoadImage(NULL, bmfile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	if (!hBG) {
 		plog_fmt(_("壁紙用ビットマップ '%s' を読み込めません。", "Can't load the bitmap file '%s'."), bmfile);
 		use_bg = 0;
@@ -824,7 +824,7 @@ static void DrawBG(HDC hdc, RECT *r)
 	swid = bm.bmWidth; shgt = bm.bmHeight;
 
 	hdcSrc = CreateCompatibleDC(hdc);
-	hOld = SelectObject(hdcSrc, hBG);
+	hOld = (HBITMAP)SelectObject(hdcSrc, hBG);
 
 	do {
 		sx = nx % swid;
@@ -1579,7 +1579,7 @@ static int new_palette(void)
 #ifdef USE_GRAPHICS
 
 	/* Check the bitmap palette */
-	hBmPal = infGraph.hPalette;
+	hBmPal = (HPALETTE)infGraph.hPalette;
 
 	/* Use the bitmap */
 	if (hBmPal)
@@ -1691,6 +1691,9 @@ static bool init_graphics(void)
 		char buf[1024];
 		int wid, hgt, twid, thgt, ox, oy;
 		cptr name;
+
+		path_build(buf, sizeof(buf), ANGBAND_DIR_XTRA_GRAF, "Ugluk.png");
+		//paint_test(hwndSaver);
 
 		if (arg_graphics == GRAPHICS_ADAM_BOLT)
 		{
@@ -1974,7 +1977,7 @@ static errr term_force_font(term_data *td, cptr path)
 
 		/* all this trouble to get the cell size */
 		hdcDesktop = GetDC(HWND_DESKTOP);
-		hfOld = SelectObject(hdcDesktop, td->font_id);
+		hfOld = (HFONT)SelectObject(hdcDesktop, td->font_id);
 		GetTextMetrics(hdcDesktop, &tm);
 		SelectObject(hdcDesktop, hfOld);
 		ReleaseDC(HWND_DESKTOP, hdcDesktop);
@@ -2125,8 +2128,8 @@ void Term_inversed_area(HWND hWnd, int x, int y, int w, int h)
 
 	hdc = GetDC(hWnd);
 	myBrush = CreateSolidBrush(RGB(255, 255, 255));
-	oldBrush = SelectObject(hdc, myBrush);
-	oldPen = SelectObject(hdc, GetStockObject(NULL_PEN) );
+	oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
+	oldPen = (HPEN)SelectObject(hdc, GetStockObject(NULL_PEN));
 
 	PatBlt(hdc, tx, ty, tw, th, PATINVERT);
 
@@ -2912,8 +2915,8 @@ static errr Term_text_win(int x, int y, int n, byte a, const char *s)
 			{
 				rc.right += td->font_wid;
 
-				oldBrush = SelectObject(hdc, myBrush);
-				oldPen = SelectObject(hdc, GetStockObject(NULL_PEN) );
+				oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
+				oldPen = (HPEN)SelectObject(hdc, GetStockObject(NULL_PEN) );
 
 				/* Dump the wall */
 				Rectangle(hdc, rc.left, rc.top, rc.right+1, rc.bottom+1);
@@ -2940,8 +2943,8 @@ static errr Term_text_win(int x, int y, int n, byte a, const char *s)
 				rc.left += 2 * td->tile_wid;
 				rc.right += 2 * td->tile_wid;
 			} else if (*(s+i)==127){
-				oldBrush = SelectObject(hdc, myBrush);
-				oldPen = SelectObject(hdc, GetStockObject(NULL_PEN) );
+				oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
+				oldPen = (HPEN)SelectObject(hdc, GetStockObject(NULL_PEN) );
 
 				/* Dump the wall */
 				Rectangle(hdc, rc.left, rc.top, rc.right+1, rc.bottom+1);
@@ -3082,7 +3085,7 @@ static errr Term_pict_win(int x, int y, int n, const byte *ap, const char *cp, c
 
 	/* More info */
 	hdcSrc = CreateCompatibleDC(hdc);
-	hbmSrcOld = SelectObject(hdcSrc, infGraph.hBitmap);
+	hbmSrcOld = (HBITMAP)SelectObject(hdcSrc, infGraph.hBitmap);
 
 	if (arg_graphics == GRAPHICS_ADAM_BOLT || arg_graphics == GRAPHICS_HENGBAND)
 	{
@@ -3197,11 +3200,13 @@ static errr Term_pict_win(int x, int y, int n, const byte *ap, const char *cp, c
 static void windows_map(void)
 {
 	term_data *td = &data[0];
-	byte a, c;
+	byte a;
+	char c;
 	int x, min_x, max_x;
 	int y, min_y, max_y;
 
-	byte ta, tc;
+	byte ta;
+	char tc;
 
 	/* Only in graphics mode */
 	if (!use_graphics) return;
@@ -4796,7 +4801,7 @@ LRESULT FAR PASCAL AngbandWndProc(HWND hWnd, UINT uMsg,
 					if (iskanji(scr[oy + i][ox - 1])) s[0] = ' ';
 				}
 
-				if (ox + dx < data[0].cols)
+				if (ox + dx < (int)data[0].cols)
 				{
 					if (iskanji(scr[oy + i][ox + dx - 1])) s[dx - 1] = ' ';
 				}
@@ -5703,7 +5708,7 @@ int FAR PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrevInst,
 		wc.hInstance     = hInst;
 		wc.hIcon         = hIcon = LoadIcon(hInst, AppName);
 		wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-		wc.hbrBackground = GetStockObject(BLACK_BRUSH);
+		wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 		wc.lpszMenuName  = AppName;
 		wc.lpszClassName = AppName;
 

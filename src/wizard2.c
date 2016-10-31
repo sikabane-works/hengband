@@ -1908,7 +1908,7 @@ extern void do_cmd_debug(void);
  */
 void do_cmd_debug(void)
 {
-	int     x, y, i;
+	int     x, y;
 	char    cmd;
 
 

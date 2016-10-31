@@ -358,7 +358,7 @@ static errr init_info_raw(int fd, header *head)
 	C_MAKE(head->info_ptr, head->info_size, char);
 
 	/* Read the "*_info" array */
-	fd_read(fd, head->info_ptr, head->info_size);
+	fd_read(fd, (char *)head->info_ptr, head->info_size);
 
 
 	if (head->name_size)
@@ -587,7 +587,7 @@ static errr init_info(cptr filename, header *head,
 			fd_write(fd, (cptr)(head), head->head_size);
 
 			/* Dump the "*_info" array */
-			fd_write(fd, head->info_ptr, head->info_size);
+			fd_write(fd, (char *)head->info_ptr, head->info_size);
 
 			/* Dump the "*_name" array */
 			fd_write(fd, head->name_ptr, head->name_size);
@@ -671,7 +671,7 @@ static errr init_f_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("f_info", &f_head,
-			 (void*)&f_info, &f_name, NULL, &f_tag);
+			 (void**)&f_info, &f_name, NULL, &f_tag);
 }
 
 
@@ -693,7 +693,7 @@ static errr init_k_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("k_info", &k_head,
-			 (void*)&k_info, &k_name, &k_text, NULL);
+			 (void**)&k_info, &k_name, &k_text, NULL);
 }
 
 
@@ -716,7 +716,7 @@ static errr init_a_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("a_info", &a_head,
-			 (void*)&a_info, &a_name, &a_text, NULL);
+			 (void**)&a_info, &a_name, &a_text, NULL);
 }
 
 
@@ -739,7 +739,7 @@ static errr init_e_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("e_info", &e_head,
-			 (void*)&e_info, &e_name, &e_text, NULL);
+			 (void**)&e_info, &e_name, &e_text, NULL);
 }
 
 
@@ -762,7 +762,7 @@ static errr init_r_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("r_info", &r_head,
-			 (void*)&r_info, &r_name, &r_text, NULL);
+			 (void**)&r_info, &r_name, &r_text, NULL);
 }
 
 
@@ -785,7 +785,7 @@ static errr init_d_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("d_info", &d_head,
-			 (void*)&d_info, &d_name, &d_text, NULL);
+			 (void**)&d_info, &d_name, &d_text, NULL);
 }
 
 
@@ -810,7 +810,7 @@ errr init_v_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("v_info", &v_head,
-			 (void*)&v_info, &v_name, &v_text, NULL);
+			 (void**)&v_info, &v_name, &v_text, NULL);
 }
 
 
@@ -832,7 +832,7 @@ static errr init_s_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("s_info", &s_head,
-			 (void*)&s_info, NULL, NULL, NULL);
+			 (void**)&s_info, NULL, NULL, NULL);
 }
 
 
@@ -854,7 +854,7 @@ static errr init_m_info(void)
 #endif /* ALLOW_TEMPLATES */
 
 	return init_info("m_info", &m_head,
-			 (void*)&m_info, NULL, NULL, NULL);
+			 (void**)&m_info, NULL, NULL, NULL);
 }
 
 
