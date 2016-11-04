@@ -76,10 +76,13 @@
 
 #ifdef WINDOWS
 #include <windows.h>
+#include <gdiplus.h>
 #include <direct.h>
 #include <locale.h>
 #include "z-term.h"
 #include "png-util.h"
+using namespace Gdiplus;
+
 
 /*
  * Extract the "WIN32" flag from the compiler
@@ -1050,6 +1053,16 @@ static void validate_dir(cptr s, bool vital)
 	}
 }
 
+bool load_image(HWND hwnd, Image *image, char *filename)
+{
+	size_t r;
+	char buf[200];
+	wchar_t wchar[200];
+	path_build(buf, sizeof(buf), ANGBAND_DIR_XTRA_GRAF, filename);
+	mbstowcs_s(&r, wchar, 200, buf, _TRUNCATE);
+	image = new Image(wchar);
+	return true;
+}
 
 /*
  * Get the "size" for a window
@@ -1691,9 +1704,6 @@ static bool init_graphics(void)
 		char buf[1024];
 		int wid, hgt, twid, thgt, ox, oy;
 		cptr name;
-
-		path_build(buf, sizeof(buf), ANGBAND_DIR_XTRA_GRAF, "Ugluk.png");
-		//paint_test(hwndSaver);
 
 		if (arg_graphics == GRAPHICS_ADAM_BOLT)
 		{
@@ -5775,6 +5785,11 @@ int FAR PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrevInst,
 		/* Save the "simple" code */
 		angband_color_table[i][0] = win_pal[i];
 	}
+
+	/* Initialize GDI+ */
+	GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken;
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	/* Prepare the windows */
 	init_windows();
