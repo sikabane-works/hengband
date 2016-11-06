@@ -81,8 +81,8 @@
 #include <locale.h>
 #include "z-term.h"
 #include "png-util.h"
-using namespace Gdiplus;
 
+using namespace Gdiplus;
 
 /*
  * Extract the "WIN32" flag from the compiler
@@ -502,6 +502,10 @@ static char bg_bitmap_file[1024] = "bg.bmp";
 
 static int use_new_gmode = 0;
 
+/* GDI+ image */
+static Image* gdi_images[100];
+static Image* background_image;
+
 #ifdef USE_SAVER
 
 /*
@@ -765,6 +769,9 @@ static byte special_key_list[] =
 };
 #endif
 
+bool load_image(Image **image, char *filename);
+void draw_image(HDC hdc, Image *image, int x, int y);
+
 /* bg */
 static void delete_bg(void)
 {
@@ -777,36 +784,21 @@ static void delete_bg(void)
 
 static int init_bg(void)
 {
-	char * bmfile = bg_bitmap_file;
+	wchar_t wchar[200];
+	size_t r;
 
 	delete_bg();
 	if (use_bg == 0) return 0;
-
-	hBG = (HBITMAP)LoadImage(NULL, bmfile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	if (!hBG) {
-		plog_fmt(_("壁紙用ビットマップ '%s' を読み込めません。", "Can't load the bitmap file '%s'."), bmfile);
+	mbstowcs_s(&r, wchar, 200, bg_bitmap_file, _TRUNCATE);
+	background_image = new Image(wchar);
+	
+	if (!background_image || background_image->GetWidth() <= 0 || background_image->GetHeight() <= 0) {
+		plog_fmt(_("壁紙用画像 '%s' を読み込めません。", "Can't load the image file '%s'."), bg_bitmap_file);
 		use_bg = 0;
+		if(background_image) delete(background_image);
 		return 0;
 	}
-#if 0 /* gomi */
-	HDC wnddc, dcimage, dcbg;
-	HBITMAP bmimage, bmimage_old, bmbg_old;
-	int i, j;
 
-	delete_bg();
-
-	wnddc = GetDC(hwnd);
-	dcimage = CreateCompatibleDC(wnddc);
-	dcbg = CreateCompatibleDC(wnddc);
-
-	bmimage = LoadImage(NULL, "bg.bmp", LR_LOADFROMFILE, 0, 0, 0);
-	if (!bmimage) quit("bg.bmpが読みこめない！");
-	bmimage_old = SelectObject(dcimage, bmimage);
-
-	CreateCompatibleBitmap();
-
-	ReleaseDC(hwnd, wnddc);
-#endif
 	use_bg = 1;
 	return 1;
 }
@@ -815,102 +807,40 @@ static void DrawBG(HDC hdc, RECT *r)
 {
 	HDC hdcSrc;
 	HBITMAP hOld;
-	BITMAP bm;
 	int x = r->left, y = r->top;
 	int nx, ny, sx, sy, swid, shgt, cwid, chgt;
-	
-	if (!use_bg || !hBG)
-		return;
+	Gdiplus::Rect rec; 
+	if(!background_image) return;
 
 	nx = x; ny = y;
-	GetObject(hBG, sizeof(bm), &bm);
-	swid = bm.bmWidth; shgt = bm.bmHeight;
-
+	swid = background_image->GetWidth(); shgt = background_image->GetHeight();
+	if(swid == 0 || shgt == 0)
+	{
+		return;
+	}
+	Graphics graphics(hdc);
 	hdcSrc = CreateCompatibleDC(hdc);
 	hOld = (HBITMAP)SelectObject(hdcSrc, hBG);
-
+	Unit srcunit = UnitPixel;
 	do {
 		sx = nx % swid;
 		cwid = MIN(swid - sx, r->right - nx);
 		do {
 			sy = ny % shgt;
 			chgt = MIN(shgt - sy, r->bottom - ny);
-				BitBlt(hdc, nx, ny, cwid, chgt, hdcSrc, sx, sy, SRCCOPY);
+
+			rec = Gdiplus::Rect(sx, sy, cwid, chgt);
+			graphics.DrawImage(background_image, rec, nx, ny, cwid, chgt, srcunit);
+//			graphics.DrawImage(background_image, nx, ny, sx, sy, swid, shgt, srcunit);
 			ny += chgt;
 		} while (ny < r->bottom);
 		ny = y;
 		nx += cwid;
 	} while (nx < r->right);
-	
+
 	SelectObject(hdcSrc, hOld);
 	DeleteDC(hdcSrc);
 }
-
-#if 0
-/*
- * Hack -- given a pathname, point at the filename
- */
-static cptr extract_file_name(cptr s)
-{
-	cptr p;
-
-	/* Start at the end */
-	p = s + strlen(s) - 1;
-
-	/* Back up to divider */
-	while ((p >= s) && (*p != ':') && (*p != '\\')) p--;
-
-	/* Return file name */
-	return (p+1);
-}
-#endif
-
-
-/*
- * Hack -- given a simple filename, extract the "font size" info
- *
- * Return a pointer to a static buffer holding the capitalized base name.
- */
-#if 0 /* #ifndef JP */
-static char *analyze_font(char *path, int *wp, int *hp)
-{
-	int wid, hgt;
-
-	char *s, *p;
-
-	/* Start at the end */
-	p = path + strlen(path) - 1;
-
-	/* Back up to divider */
-	while ((p >= path) && (*p != ':') && (*p != '\\')) --p;
-
-	/* Advance to file name */
-	++p;
-
-	/* Capitalize */
-	for (s = p; *s; ++s)
-	{
-		/* Capitalize (be paranoid) */
-		if (islower(*s)) *s = toupper(*s);
-	}
-
-	/* Find first 'X' */
-	s = my_strchr(p, 'X');
-
-	/* Extract font width */
-	wid = atoi(p);
-
-	/* Extract height */
-	hgt = s ? atoi(s+1) : 0;
-
-	/* Save results */
-	(*wp) = wid;
-	(*hp) = hgt;
-
-	/* Result */
-	return (p);
-}
-#endif
 
 
 /*
@@ -1053,16 +983,24 @@ static void validate_dir(cptr s, bool vital)
 	}
 }
 
-bool load_image(HWND hwnd, Image *image, char *filename)
+bool load_image(Image **image, char *filename)
 {
 	size_t r;
 	char buf[200];
 	wchar_t wchar[200];
 	path_build(buf, sizeof(buf), ANGBAND_DIR_XTRA_GRAF, filename);
 	mbstowcs_s(&r, wchar, 200, buf, _TRUNCATE);
-	image = new Image(wchar);
+	*image = new Image(wchar);
 	return true;
 }
+
+void draw_image(HDC hdc, Image *image, int x, int y)
+{
+	if(image == NULL) return;
+    Graphics graphics(hdc);
+    graphics.DrawImage(image, x, y);
+}
+
 
 /*
  * Get the "size" for a window
@@ -2826,7 +2764,9 @@ static errr Term_wipe_win(int x, int y, int n)
 	SelectObject(hdc, td->font_id);
 	/* bg */
 	if (use_bg)
+	{
 		DrawBG(hdc, &rc);
+	}
 	else
 		ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, NULL, 0, NULL);
 	ReleaseDC(td->w, hdc);
@@ -2909,7 +2849,10 @@ static errr Term_text_win(int x, int y, int n, byte a, const char *s)
 		ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, NULL, 0, NULL);
 		
 		/* bg */
-		if (use_bg) DrawBG(hdc, &rc);
+		if (use_bg)
+		{
+			DrawBG(hdc, &rc);
+		}
 
 		/* New rectangle */
 		rc.left += ((td->tile_wid - td->font_wid) / 2);
@@ -4437,7 +4380,7 @@ static void process_menus(WORD wCmd)
 				memset(&ofn, 0, sizeof(ofn));
 				ofn.lStructSize = sizeof(ofn);
 				ofn.hwndOwner = data[0].w;
-				ofn.lpstrFilter = "Bitmap Files (*.bmp)\0*.bmp\0";
+				ofn.lpstrFilter = "Image Files (*.bmp, *.png, *.jpg, *.jpeg)\0*.*\0";
 				ofn.nFilterIndex = 1;
 				ofn.lpstrFile = bg_bitmap_file;
 				ofn.nMaxFile = 1023;

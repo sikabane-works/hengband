@@ -163,7 +163,6 @@
     <ClCompile Include="..\..\src\obj_kind.c" />
     <ClCompile Include="..\..\src\object1.c" />
     <ClCompile Include="..\..\src\object2.c" />
-    <ClCompile Include="..\..\src\png-util.cpp" />
     <ClCompile Include="..\..\src\racial.c" />
     <ClCompile Include="..\..\src\readdib.c" />
     <ClCompile Include="..\..\src\report.c" />
@@ -204,7 +203,6 @@
     <ClInclude Include="..\..\src\init.h" />
     <ClInclude Include="..\..\src\kajitips.h" />
     <ClInclude Include="..\..\src\mindtips.h" />
-    <ClInclude Include="..\..\src\png-util.h" />
     <ClInclude Include="..\..\src\readdib.h" />
     <ClInclude Include="..\..\src\rooms.h" />
     <ClInclude Include="..\..\src\streams.h" />
