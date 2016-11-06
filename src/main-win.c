@@ -775,10 +775,10 @@ void draw_image(HDC hdc, Image *image, int x, int y);
 /* bg */
 static void delete_bg(void)
 {
-	if (hBG != NULL)
+	if (background_image != NULL)
 	{
-		DeleteObject(hBG);
-		hBG = NULL;
+		delete background_image;
+		background_image = NULL;
 	}
 }
 
