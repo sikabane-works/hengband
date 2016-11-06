@@ -374,6 +374,7 @@ struct _term_data
 	cptr s;
 
 	HWND w;
+	Gdiplus::Graphics *graphics;
 
 	DWORD dwStyle;
 	DWORD dwExStyle;
@@ -505,6 +506,8 @@ static int use_new_gmode = 0;
 /* GDI+ image */
 static Image* gdi_images[100];
 static Image* background_image;
+static int bg_width = 0;
+static int bg_height = 0;
 
 #ifdef USE_SAVER
 
@@ -798,12 +801,13 @@ static int init_bg(void)
 		if(background_image) delete(background_image);
 		return 0;
 	}
-
+	bg_width = background_image->GetWidth();
+	bg_height = background_image->GetHeight();
 	use_bg = 1;
 	return 1;
 }
 
-static void DrawBG(HDC hdc, RECT *r)
+static void DrawBG(term_data *td, RECT *r)
 {
 	HDC hdcSrc;
 	HBITMAP hOld;
@@ -813,14 +817,11 @@ static void DrawBG(HDC hdc, RECT *r)
 	if(!background_image) return;
 
 	nx = x; ny = y;
-	swid = background_image->GetWidth(); shgt = background_image->GetHeight();
+	swid = bg_width; shgt = bg_height;
 	if(swid == 0 || shgt == 0)
 	{
 		return;
 	}
-	Graphics graphics(hdc);
-	hdcSrc = CreateCompatibleDC(hdc);
-	hOld = (HBITMAP)SelectObject(hdcSrc, hBG);
 	Unit srcunit = UnitPixel;
 	do {
 		sx = nx % swid;
@@ -828,18 +829,14 @@ static void DrawBG(HDC hdc, RECT *r)
 		do {
 			sy = ny % shgt;
 			chgt = MIN(shgt - sy, r->bottom - ny);
-
 			rec = Gdiplus::Rect(sx, sy, cwid, chgt);
-			graphics.DrawImage(background_image, rec, nx, ny, cwid, chgt, srcunit);
-//			graphics.DrawImage(background_image, nx, ny, sx, sy, swid, shgt, srcunit);
+			td->graphics->DrawImage(background_image, rec, nx, ny, cwid, chgt, srcunit);
 			ny += chgt;
 		} while (ny < r->bottom);
 		ny = y;
 		nx += cwid;
 	} while (nx < r->right);
 
-	SelectObject(hdcSrc, hOld);
-	DeleteDC(hdcSrc);
 }
 
 
@@ -2366,7 +2363,7 @@ static errr Term_xtra_win_clear(void)
 	if (use_bg)
 	{
 		rc.left = 0; rc.top = 0;
-		DrawBG(hdc, &rc);
+		DrawBG(td, &rc);
 	}
 	ReleaseDC(td->w, hdc);
 
@@ -2765,7 +2762,7 @@ static errr Term_wipe_win(int x, int y, int n)
 	/* bg */
 	if (use_bg)
 	{
-		DrawBG(hdc, &rc);
+		DrawBG(td, &rc);
 	}
 	else
 		ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, NULL, 0, NULL);
@@ -2851,7 +2848,7 @@ static errr Term_text_win(int x, int y, int n, byte a, const char *s)
 		/* bg */
 		if (use_bg)
 		{
-			DrawBG(hdc, &rc);
+			DrawBG(td, &rc);
 		}
 
 		/* New rectangle */
@@ -3396,6 +3393,14 @@ static void init_windows(void)
 		my_td = NULL;
 		if (!td->w) quit(_("サブウィンドウに作成に失敗しました", "Failed to create sub-window"));
 
+		if(td->graphics)
+		{
+			delete td->graphics;
+			td->graphics = NULL;
+		}
+		td->graphics = new Gdiplus::Graphics(GetDC(td->w));
+
+
 		if (td->visible)
 		{
 			td->size_hack = TRUE;
@@ -3436,6 +3441,12 @@ static void init_windows(void)
 	my_td = NULL;
 	if (!td->w) quit(_("メインウィンドウの作成に失敗しました", "Failed to create Angband window"));
 
+	if(td->graphics)
+	{
+		delete td->graphics;
+		td->graphics = NULL;
+	}
+	td->graphics = new Gdiplus::Graphics(GetDC(td->w));
 	term_data_link(td);
 	angband_term[0] = &td->t;
 	normsize.x = td->cols;
