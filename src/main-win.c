@@ -506,6 +506,8 @@ static int use_new_gmode = 0;
 /* GDI+ image */
 static Image* gdi_images[100];
 static Image* background_image;
+HBITMAP bgBmp;
+HDC hBackdc;
 static int bg_width = 0;
 static int bg_height = 0;
 
@@ -783,17 +785,27 @@ static void delete_bg(void)
 		delete background_image;
 		background_image = NULL;
 	}
+
+	if (bgBmp != NULL)
+	{
+		DeleteObject(bgBmp);
+		bgBmp = NULL;
+	}
+	ReleaseDC(data[0].w, hBackdc);
+
 }
 
 static int init_bg(void)
 {
 	wchar_t wchar[200];
 	size_t r;
+	HDC hdc = GetDC(data[0].w);
+	hBackdc = CreateCompatibleDC(hdc);
 
 	delete_bg();
 	if (use_bg == 0) return 0;
 	mbstowcs_s(&r, wchar, 200, bg_bitmap_file, _TRUNCATE);
-	background_image = new Image(wchar);
+	background_image = new Image((wchar_t *)wchar);
 	
 	if (!background_image || background_image->GetWidth() <= 0 || background_image->GetHeight() <= 0) {
 		plog_fmt(_("壁紙用画像 '%s' を読み込めません。", "Can't load the image file '%s'."), bg_bitmap_file);
@@ -803,17 +815,21 @@ static int init_bg(void)
 	}
 	bg_width = background_image->GetWidth();
 	bg_height = background_image->GetHeight();
+	bgBmp = CreateCompatibleBitmap(hdc, bg_width, bg_height);
+	SelectObject(hBackdc, bgBmp);
+	Graphics g(hBackdc);
+	g.DrawImage(background_image, 0, 0, bg_width, bg_height);
+	ReleaseDC(data[0].w, hdc);
+
 	use_bg = 1;
 	return 1;
 }
 
 static void DrawBG(term_data *td, RECT *r)
 {
-	HDC hdcSrc;
-	HBITMAP hOld;
+	HDC hdc = GetDC(td->w);
 	int x = r->left, y = r->top;
 	int nx, ny, sx, sy, swid, shgt, cwid, chgt;
-	Gdiplus::Rect rec; 
 	if(!background_image) return;
 
 	nx = x; ny = y;
@@ -822,21 +838,18 @@ static void DrawBG(term_data *td, RECT *r)
 	{
 		return;
 	}
-	Unit srcunit = UnitPixel;
 	do {
 		sx = nx % swid;
 		cwid = MIN(swid - sx, r->right - nx);
 		do {
 			sy = ny % shgt;
 			chgt = MIN(shgt - sy, r->bottom - ny);
-			rec = Gdiplus::Rect(sx, sy, cwid, chgt);
-			td->graphics->DrawImage(background_image, rec, nx, ny, cwid, chgt, srcunit);
+			BitBlt(hdc, nx, ny, cwid, chgt, hBackdc, sx, sy, SRCCOPY);
 			ny += chgt;
 		} while (ny < r->bottom);
 		ny = y;
 		nx += cwid;
 	} while (nx < r->right);
-
 }
 
 
@@ -4391,7 +4404,7 @@ static void process_menus(WORD wCmd)
 				memset(&ofn, 0, sizeof(ofn));
 				ofn.lStructSize = sizeof(ofn);
 				ofn.hwndOwner = data[0].w;
-				ofn.lpstrFilter = "Image Files (*.bmp, *.png, *.jpg, *.jpeg)\0*.*\0";
+				ofn.lpstrFilter = "Image Files (*.bmp, *.gif, *.jpeg, *.jpg, *.png)\0*.bmp;*.gif;*.jpeg;*.jpg;*.png\0";
 				ofn.nFilterIndex = 1;
 				ofn.lpstrFile = bg_bitmap_file;
 				ofn.nMaxFile = 1023;
