@@ -4087,6 +4087,8 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_I_WID_6:
 		case IDM_WINDOW_I_WID_7:
 		{
+			if(arg_graphics == GRAPHICS_HENGBAND) break;
+
 			i = wCmd - IDM_WINDOW_I_WID_0;
 
 			if ((i < 0) || (i >= MAX_TERM_DATA)) break;
@@ -4112,6 +4114,8 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_D_WID_6:
 		case IDM_WINDOW_D_WID_7:
 		{
+			if(arg_graphics == GRAPHICS_HENGBAND) break;
+
 			i = wCmd - IDM_WINDOW_D_WID_0;
 
 			if ((i < 0) || (i >= MAX_TERM_DATA)) break;
@@ -4137,6 +4141,8 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_I_HGT_6:
 		case IDM_WINDOW_I_HGT_7:
 		{
+			if(arg_graphics == GRAPHICS_HENGBAND) break;
+
 			i = wCmd - IDM_WINDOW_I_HGT_0;
 
 			if ((i < 0) || (i >= MAX_TERM_DATA)) break;
@@ -4162,6 +4168,8 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_D_HGT_6:
 		case IDM_WINDOW_D_HGT_7:
 		{
+			if(arg_graphics == GRAPHICS_HENGBAND) break;
+
 			i = wCmd - IDM_WINDOW_D_HGT_0;
 
 			if ((i < 0) || (i >= MAX_TERM_DATA)) break;
@@ -4284,7 +4292,9 @@ static void process_menus(WORD wCmd)
 				break;
 			}
 
-			/* Toggle "arg_sound" */
+			if(use_new_gmode) break;
+
+			/* Toggle "arg_bigtile" */
 			arg_bigtile = !arg_bigtile;
 
 			/* Activate */
@@ -4301,7 +4311,7 @@ static void process_menus(WORD wCmd)
 
 		case IDM_OPTIONS_NEW_GRAPHICS_MODE:
 		{
-			use_new_gmode = !use_new_gmode;
+			term_data *td = &data[0];
 
 			/* Paranoia */
 			if (!inkey_flag)
@@ -4310,18 +4320,35 @@ static void process_menus(WORD wCmd)
 				break;
 			}
 
+			use_new_gmode = !use_new_gmode;
+
 			/* Toggle "arg_graphics" */
-			if (arg_graphics != GRAPHICS_HENGBAND)
+			if (use_new_gmode)
 			{
-				arg_graphics = GRAPHICS_HENGBAND;
+				td->tile_hgt = 24;
+				td->tile_wid = 24;
+				arg_bigtile = false;
 
-				/* React to changes */
-				Term_xtra_win_react();
+				term_getsize(td);
+				term_window_resize(td);
+			}
+			else
+			{
+				td->tile_hgt = td->font_hgt;
+				td->tile_wid = td->font_wid;
 
-				/* Hack -- Force redraw */
-				Term_key_push(KTRL('R'));
+				term_getsize(td);
+				term_window_resize(td);
+
 			}
 			break;
+
+			/* React to changes */
+			Term_xtra_win_react();
+
+			/* Hack -- Force redraw */
+			Term_key_push(KTRL('R'));
+
 		}
 
 		case IDM_OPTIONS_MUSIC:
