@@ -1133,11 +1133,13 @@ static void save_prefs_aux(int i)
 	else wsprintf(buf, "%d", td->rows);
 	WritePrivateProfileString(sec_name, "NumRows", buf, ini_file);
 
-	/* Maxmized (only main window) */
+	/* Maxmized and NewGraphicMode (only main window) */
 	if (i == 0)
 	{
 		strcpy(buf, IsZoomed(td->w) ? "1" : "0");
 		WritePrivateProfileString(sec_name, "Maximized", buf, ini_file);
+		strcpy(buf, use_new_gmode ? "1" : "0");
+		WritePrivateProfileString(sec_name, "NewGraphicMode", buf, ini_file);
 	}
 
 	/* Acquire position */
@@ -1274,6 +1276,7 @@ static void load_prefs_aux(int i)
 	if (i == 0)
 	{
 		win_maximized = GetPrivateProfileInt(sec_name, "Maximized", win_maximized, ini_file);
+		use_new_gmode = GetPrivateProfileInt(sec_name, "NewGraphicMode", win_maximized, ini_file);
 	}
 
 	/* Window position */
@@ -4087,7 +4090,7 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_I_WID_6:
 		case IDM_WINDOW_I_WID_7:
 		{
-			if(arg_graphics == GRAPHICS_HENGBAND) break;
+			if(use_new_gmode) break;
 
 			i = wCmd - IDM_WINDOW_I_WID_0;
 
@@ -4114,7 +4117,7 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_D_WID_6:
 		case IDM_WINDOW_D_WID_7:
 		{
-			if(arg_graphics == GRAPHICS_HENGBAND) break;
+			if(use_new_gmode) break;
 
 			i = wCmd - IDM_WINDOW_D_WID_0;
 
@@ -4141,7 +4144,7 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_I_HGT_6:
 		case IDM_WINDOW_I_HGT_7:
 		{
-			if(arg_graphics == GRAPHICS_HENGBAND) break;
+			if(use_new_gmode) break;
 
 			i = wCmd - IDM_WINDOW_I_HGT_0;
 
@@ -4168,7 +4171,7 @@ static void process_menus(WORD wCmd)
 		case IDM_WINDOW_D_HGT_6:
 		case IDM_WINDOW_D_HGT_7:
 		{
-			if(arg_graphics == GRAPHICS_HENGBAND) break;
+			if(use_new_gmode) break;
 
 			i = wCmd - IDM_WINDOW_D_HGT_0;
 
@@ -4327,7 +4330,7 @@ static void process_menus(WORD wCmd)
 			{
 				td->tile_hgt = 24;
 				td->tile_wid = 24;
-				arg_bigtile = false;
+				arg_bigtile = 0;
 
 				term_getsize(td);
 				term_window_resize(td);
@@ -4710,8 +4713,17 @@ LRESULT FAR PASCAL AngbandWndProc(HWND hWnd, UINT uMsg,
 
 			/* Minimum window size is 80x24 */
 			rc.left = rc.top = 0;
-			rc.right = rc.left + 80 * td->tile_wid + td->size_ow1 + td->size_ow2;
-			rc.bottom = rc.top + 24 * td->tile_hgt + td->size_oh1 + td->size_oh2 + 1;
+
+			if(use_new_gmode)
+			{
+				rc.right = rc.left + 20 * td->tile_wid + td->size_ow1 + td->size_ow2;
+				rc.bottom = rc.top + 20 * td->tile_hgt + td->size_oh1 + td->size_oh2 + 1;
+			}
+			else
+			{
+				rc.right = rc.left + 80 * td->tile_wid + td->size_ow1 + td->size_ow2;
+				rc.bottom = rc.top + 24 * td->tile_hgt + td->size_oh1 + td->size_oh2 + 1;
+			}
 
 			/* Adjust */
 			AdjustWindowRectEx(&rc, td->dwStyle, TRUE, td->dwExStyle);
