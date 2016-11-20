@@ -2040,7 +2040,7 @@ void get_screen_size(int *wid_p, int *hgt_p)
 {
 	Term_get_size(wid_p, hgt_p);
 	*hgt_p -= ROW_MAP + 2;
-	*wid_p -= COL_MAP + 2;
+	*wid_p -= (use_new_gmode ? 0 : COL_MAP) + 2;
 	if (use_bigtile) *wid_p /= 2;
 }
 

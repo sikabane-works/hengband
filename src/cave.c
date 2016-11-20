@@ -1384,7 +1384,7 @@ static int panel_col_of(int col)
 {
 	col -= panel_col_min;
 	if (use_bigtile) col *= 2;
-	return col + 13; 
+	return col + ((use_new_gmode ? 0 : COL_MAP + 1)); 
 }
 
 
@@ -1671,8 +1671,16 @@ void prt_map(void)
 	Term_get_size(&wid, &hgt);
 
 	/* Remove map offset */
-	wid -= COL_MAP + 2;
-	hgt -= ROW_MAP + 2;
+	if(use_new_gmode)
+	{
+		wid -= 2;
+		hgt -= 2;
+	}
+	else
+	{
+		wid -= (COL_MAP + 2);
+		hgt -= (ROW_MAP + 2);
+	}
 
 	/* Access the cursor state */
 	(void)Term_get_cursor(&v);
@@ -1690,14 +1698,29 @@ void prt_map(void)
 	for (y = 1; y <= ymin - panel_row_prt; y++)
 	{
 		/* Erase the section */
-		Term_erase(COL_MAP, y, wid);
+		if(use_new_gmode)
+		{
+			Term_erase(0, y, wid);
+		}
+		else
+		{
+			Term_erase(COL_MAP, y, wid);
+		}
 	}
 
 	/* Top section of screen */
 	for (y = ymax - panel_row_prt; y <= hgt; y++)
 	{
 		/* Erase the section */
-		Term_erase(COL_MAP, y, wid);
+		if(!use_new_gmode)
+		{
+			Term_erase(0, y, wid);
+		}
+		else
+		{
+			Term_erase(COL_MAP, y, wid);
+		}
+
 	}
 
 	/* Dump the map */
@@ -1936,7 +1959,8 @@ void display_map(int *cy, int *cx)
 	/* Get size */
 	Term_get_size(&wid, &hgt);
 	hgt -= 2;
-	wid -= 14;
+	wid -= (use_new_gmode ? 2 : 14);
+
 	if (use_bigtile) wid /= 2;
 
 	yrat = (cur_hgt + hgt - 1) / hgt;
@@ -2094,7 +2118,14 @@ void display_map(int *cy, int *cx)
 	for (y = 0; y < hgt + 2; ++y)
 	{
 		/* Start a new line */
-		Term_gotoxy(COL_MAP, y);
+		if(use_new_gmode)
+		{
+			Term_gotoxy(0, y);
+		}
+		else
+		{
+			Term_gotoxy(COL_MAP, y);
+		}
 
 		/* Display the line */
 		for (x = 0; x < wid + 2; ++x)
@@ -2148,9 +2179,9 @@ void display_map(int *cy, int *cx)
 	/* Player location */
 		(*cy) = p_ptr->y / yrat + 1 + ROW_MAP;
 	if (!use_bigtile)
-		(*cx) = p_ptr->x / xrat + 1 + COL_MAP;
+		(*cx) = p_ptr->x / xrat + 1 + (use_new_gmode ? 0 : COL_MAP);
 	else
-		(*cx) = (p_ptr->x / xrat + 1) * 2 + COL_MAP;
+		(*cx) = (p_ptr->x / xrat + 1) * 2 + (use_new_gmode ? 0 : COL_MAP);
 
 	/* Restore lighting effects */
 	view_special_lite = old_view_special_lite;

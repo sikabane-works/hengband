@@ -2065,7 +2065,7 @@ static void fix_overhead(void)
 
 		/* Full map in too small window is useless  */
 		Term_get_size(&wid, &hgt);
-		if (wid > COL_MAP + 2 && hgt > ROW_MAP + 2)
+		if (wid > (use_new_gmode ? 0 : COL_MAP) + 2 && hgt > ROW_MAP + 2)
 		{
 			/* Redraw map */
 			display_map(&cy, &cx);
@@ -5982,9 +5982,12 @@ void redraw_stuff(void)
 	/* Hack -- clear the screen */
 	if (p_ptr->redraw & (PR_WIPE))
 	{
-		p_ptr->redraw &= ~(PR_WIPE);
-		msg_print(NULL);
-		Term_clear();
+		if(!use_new_gmode)
+		{
+			p_ptr->redraw &= ~(PR_WIPE);
+			msg_print(NULL);
+			Term_clear();
+		}
 	}
 
 
@@ -6002,100 +6005,143 @@ void redraw_stuff(void)
 		p_ptr->redraw &= ~(PR_LEV | PR_EXP | PR_GOLD);
 		p_ptr->redraw &= ~(PR_ARMOR | PR_HP | PR_MANA);
 		p_ptr->redraw &= ~(PR_DEPTH | PR_HEALTH | PR_UHEALTH);
-		prt_frame_basic();
-		prt_time();
-		prt_dungeon();
+		if(!use_new_gmode)
+		{
+			prt_frame_basic();
+			prt_time();
+			prt_dungeon();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_EQUIPPY))
 	{
 		p_ptr->redraw &= ~(PR_EQUIPPY);
-		print_equippy(); /* To draw / delete equippy chars */
+		if(!use_new_gmode)
+		{
+			print_equippy(); /* To draw / delete equippy chars */
+		}
 	}
 
 	if (p_ptr->redraw & (PR_MISC))
 	{
 		p_ptr->redraw &= ~(PR_MISC);
-		prt_field(rp_ptr->title, ROW_RACE, COL_RACE);
-/*		prt_field(cp_ptr->title, ROW_CLASS, COL_CLASS); */
-
+		if(!use_new_gmode)
+		{
+			prt_field(rp_ptr->title, ROW_RACE, COL_RACE);
+		}
 	}
 
 	if (p_ptr->redraw & (PR_TITLE))
 	{
 		p_ptr->redraw &= ~(PR_TITLE);
-		prt_title();
+		if(!use_new_gmode)
+		{
+			prt_title();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_LEV))
 	{
 		p_ptr->redraw &= ~(PR_LEV);
-		prt_level();
+		if(!use_new_gmode)
+		{
+			prt_level();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_EXP))
 	{
 		p_ptr->redraw &= ~(PR_EXP);
-		prt_exp();
+		if(!use_new_gmode)
+		{
+			prt_exp();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_STATS))
 	{
 		p_ptr->redraw &= ~(PR_STATS);
-		prt_stat(A_STR);
-		prt_stat(A_INT);
-		prt_stat(A_WIS);
-		prt_stat(A_DEX);
-		prt_stat(A_CON);
-		prt_stat(A_CHR);
+		if(!use_new_gmode)
+		{
+			prt_stat(A_STR);
+			prt_stat(A_INT);
+			prt_stat(A_WIS);
+			prt_stat(A_DEX);
+			prt_stat(A_CON);
+			prt_stat(A_CHR);
+		}
 	}
 
 	if (p_ptr->redraw & (PR_STATUS))
 	{
 		p_ptr->redraw &= ~(PR_STATUS);
-		prt_status();
+		if(!use_new_gmode)
+		{
+			prt_status();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_ARMOR))
 	{
 		p_ptr->redraw &= ~(PR_ARMOR);
-		prt_ac();
+		if(!use_new_gmode)
+		{
+			prt_ac();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_HP))
 	{
 		p_ptr->redraw &= ~(PR_HP);
-		prt_hp();
+		if(!use_new_gmode)
+		{
+			prt_hp();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_MANA))
 	{
 		p_ptr->redraw &= ~(PR_MANA);
-		prt_sp();
+		if(!use_new_gmode)
+		{
+			prt_sp();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_GOLD))
 	{
 		p_ptr->redraw &= ~(PR_GOLD);
-		prt_gold();
+		if(!use_new_gmode)
+		{
+			prt_gold();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_DEPTH))
 	{
 		p_ptr->redraw &= ~(PR_DEPTH);
-		prt_depth();
+		if(!use_new_gmode)
+		{
+			prt_depth();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_HEALTH))
 	{
 		p_ptr->redraw &= ~(PR_HEALTH);
-		health_redraw(FALSE);
+		if(!use_new_gmode)
+		{
+			health_redraw(FALSE);
+		}
 	}
 
 	if (p_ptr->redraw & (PR_UHEALTH))
 	{
 		p_ptr->redraw &= ~(PR_UHEALTH);
-		health_redraw(TRUE);
+		if(!use_new_gmode)
+		{
+			health_redraw(TRUE);
+		}
 	}
 
 
@@ -6105,37 +6151,55 @@ void redraw_stuff(void)
 		p_ptr->redraw &= ~(PR_CUT | PR_STUN);
 		p_ptr->redraw &= ~(PR_HUNGER);
 		p_ptr->redraw &= ~(PR_STATE | PR_SPEED | PR_STUDY | PR_IMITATION | PR_STATUS);
-		prt_frame_extra();
+		if(!use_new_gmode)
+		{
+			prt_frame_extra();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_CUT))
 	{
 		p_ptr->redraw &= ~(PR_CUT);
-		prt_cut();
+		if(!use_new_gmode)
+		{
+			prt_cut();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_STUN))
 	{
 		p_ptr->redraw &= ~(PR_STUN);
-		prt_stun();
+		if(!use_new_gmode)
+		{
+			prt_stun();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_HUNGER))
 	{
 		p_ptr->redraw &= ~(PR_HUNGER);
-		prt_hunger();
+		if(!use_new_gmode)
+		{
+			prt_hunger();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_STATE))
 	{
 		p_ptr->redraw &= ~(PR_STATE);
-		prt_state();
+		if(!use_new_gmode)
+		{
+			prt_state();
+		}
 	}
 
 	if (p_ptr->redraw & (PR_SPEED))
 	{
 		p_ptr->redraw &= ~(PR_SPEED);
-		prt_speed();
+		if(!use_new_gmode)
+		{
+			prt_speed();
+		}
 	}
 
 	if (p_ptr->pclass == CLASS_IMITATOR)
@@ -6143,13 +6207,19 @@ void redraw_stuff(void)
 		if (p_ptr->redraw & (PR_IMITATION))
 		{
 			p_ptr->redraw &= ~(PR_IMITATION);
-			prt_imitation();
+			if(!use_new_gmode)
+			{
+				prt_imitation();
+			}
 		}
 	}
 	else if (p_ptr->redraw & (PR_STUDY))
 	{
 		p_ptr->redraw &= ~(PR_STUDY);
-		prt_study();
+		if(!use_new_gmode)
+		{
+			prt_study();
+		}
 	}
 }
 

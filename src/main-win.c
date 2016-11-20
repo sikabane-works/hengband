@@ -501,8 +501,6 @@ static HBITMAP hBG = NULL;
 static int use_bg = 0;
 static char bg_bitmap_file[1024] = "bg.bmp";
 
-static int use_new_gmode = 0;
-
 /* GDI+ image */
 static Image* gdi_images[100];
 static Image* background_image;
@@ -4328,9 +4326,9 @@ static void process_menus(WORD wCmd)
 			/* Toggle "arg_graphics" */
 			if (use_new_gmode)
 			{
-				td->tile_hgt = 24;
-				td->tile_wid = 24;
-				arg_bigtile = 0;
+				td->tile_hgt = 64;
+				td->tile_wid = 32;
+				arg_bigtile = true;
 
 				term_getsize(td);
 				term_window_resize(td);

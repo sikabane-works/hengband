@@ -176,6 +176,7 @@ extern bool use_sound;
 extern bool use_music;
 extern bool use_graphics;
 extern bool use_bigtile;
+extern bool use_new_gmode;
 extern s16b signal_count;
 extern bool inkey_base;
 extern bool inkey_xtra;
