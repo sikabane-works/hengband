@@ -4580,6 +4580,27 @@ static bool process_keydown(WPARAM wParam, LPARAM lParam)
 
 	Term_no_press = (ma) ? TRUE : FALSE;
 
+	/* Change Term size */
+	if (inkey_flag && use_new_gmode)
+	{
+		term_data *td = &data[0];
+		if((GetKeyState(VK_OEM_PLUS) < 0) && mc && td->tile_hgt < 64)
+		{
+			td->tile_hgt += 2;
+			td->tile_wid += 1;
+			term_getsize(td);
+			term_window_resize(td);
+		}
+		else if((GetKeyState(VK_OEM_MINUS) < 0) && mc && td->tile_hgt >= 10)
+		{
+			td->tile_hgt -= 2;
+			td->tile_wid -= 1;
+			term_getsize(td);
+			term_window_resize(td);
+		}
+	}
+
+
 	/* Handle "special" keys */
 	if (special_key[(byte)(wParam)] || (ma && !ignore_key[(byte)(wParam)]) )
 	{

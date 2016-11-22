@@ -5730,6 +5730,7 @@ bool show_file(bool show_version, cptr name, cptr what, int line, int mode)
 
 			/* Hack -- Re-Open the file */
 			fff = my_fopen(path, "r");
+
 		}
 
 		/* Return to last screen */
@@ -5740,6 +5741,7 @@ bool show_file(bool show_version, cptr name, cptr what, int line, int mode)
 
 		/* Exit on the q key */
 		if (skey == 'q') break;
+
 	}
 
 	/* Close the file */
