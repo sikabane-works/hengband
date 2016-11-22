@@ -84,6 +84,10 @@
 
 using namespace Gdiplus;
 
+static void tile_zoom_in();
+static void tile_zoom_out();
+
+
 /*
  * Extract the "WIN32" flag from the compiler
  */
@@ -201,6 +205,8 @@ using namespace Gdiplus;
 
 #define IDM_HELP_CONTENTS       901
 
+#define TILE_HEIGHT_MAX 64 /*!< 新グラフィックモード時のタイル最大高さ / Max tile height on new graphic mode */
+#define TILE_HEIGHT_MIN 10 /*!< 新グラフィックモード時のタイル最小高さ / Min tile height on new graphic mode */
 
 
 /*
@@ -4581,25 +4587,8 @@ static bool process_keydown(WPARAM wParam, LPARAM lParam)
 	Term_no_press = (ma) ? TRUE : FALSE;
 
 	/* Change Term size */
-	if (inkey_flag && use_new_gmode)
-	{
-		term_data *td = &data[0];
-		if((GetKeyState(VK_OEM_PLUS) < 0) && mc && td->tile_hgt < 64)
-		{
-			td->tile_hgt += 2;
-			td->tile_wid += 1;
-			term_getsize(td);
-			term_window_resize(td);
-		}
-		else if((GetKeyState(VK_OEM_MINUS) < 0) && mc && td->tile_hgt >= 10)
-		{
-			td->tile_hgt -= 2;
-			td->tile_wid -= 1;
-			term_getsize(td);
-			term_window_resize(td);
-		}
-	}
-
+	if((GetKeyState(VK_OEM_PLUS) < 0) && mc) tile_zoom_in();
+	else if((GetKeyState(VK_OEM_MINUS) < 0) && mc) tile_zoom_out(); 
 
 	/* Handle "special" keys */
 	if (special_key[(byte)(wParam)] || (ma && !ignore_key[(byte)(wParam)]) )
@@ -4677,6 +4666,12 @@ static bool process_keydown(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+static bool process_mousewheel(WPARAM wParam, LPARAM lParam)
+{
+	if((int)wParam >= WHEEL_DELTA) tile_zoom_in();
+	else if((int)wParam < -WHEEL_DELTA) tile_zoom_out(); 
+	return 0;
+}
 
 #ifdef __MWERKS__
 LRESULT FAR PASCAL AngbandWndProc(HWND hWnd, UINT uMsg,
@@ -4779,6 +4774,13 @@ LRESULT FAR PASCAL AngbandWndProc(HWND hWnd, UINT uMsg,
 		case WM_KEYDOWN:
 		{
 			if (process_keydown(wParam, lParam))
+				return 0;
+			break;
+		}
+
+		case WM_MOUSEWHEEL:
+		{
+			if (process_mousewheel(wParam, lParam))
 				return 0;
 			break;
 		}
@@ -5930,3 +5932,26 @@ int FAR PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrevInst,
 
 #endif /* WINDOWS */
 
+static void tile_zoom_in()
+{
+		term_data *td = &data[0];
+		if(td->tile_hgt < TILE_HEIGHT_MAX && inkey_flag && use_new_gmode)
+		{
+			td->tile_hgt += 2;
+			td->tile_wid += 1;
+			term_getsize(td);
+			term_window_resize(td);
+		}
+}
+
+static void tile_zoom_out()
+{
+		term_data *td = &data[0];
+		if(td->tile_hgt >= TILE_HEIGHT_MIN && inkey_flag && use_new_gmode)
+		{
+			td->tile_hgt -= 2;
+			td->tile_wid -= 1;
+			term_getsize(td);
+			term_window_resize(td);
+		}
+}
