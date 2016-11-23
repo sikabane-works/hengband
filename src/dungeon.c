@@ -5049,7 +5049,10 @@ static void process_player(void)
 			/* Update the monster */
 			update_mon(i, FALSE);
 		}
-		prt_time();
+		if(!use_new_gmode)
+		{
+			prt_time();
+		}
 	}
 
 	/* Give the player some energy */
@@ -5060,7 +5063,10 @@ static void process_player(void)
 
 	/* No turn yet */
 	if (p_ptr->energy_need > 0) return;
-	if (!command_rep) prt_time();
+	if (!command_rep && !use_new_gmode)
+	{
+		prt_time();
+	}
 
 	/*** Check for interupts ***/
 
