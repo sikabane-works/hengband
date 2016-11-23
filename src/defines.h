@@ -124,6 +124,30 @@
  */
 #define MAX_WID         198
 
+/*!
+ * @brief termスクリーンの最小行(旧処理時)
+ * Maximum term height.
+ */
+#define MIN_TERM_HEIGHT        24
+
+/*!
+ * @brief termスクリーンの最小列(旧処理時)
+ * Maximum term width.
+ */
+#define MIN_TERM_WIDTH         80
+
+/*!
+ * @brief termスクリーンの最小行(新グラフィックモード処理時)
+ * Maximum term height.
+ */
+#define MIN_TERM_HEIGHT_NG        9
+
+/*!
+ * @brief termスクリーンの最小列(新グラフィックモード処理時)
+ * Maximum term width.
+ */
+#define MIN_TERM_WIDTH_NG         18
+
 /*
  * Quest constants
  */

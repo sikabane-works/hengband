@@ -4752,18 +4752,17 @@ LRESULT FAR PASCAL AngbandWndProc(HWND hWnd, UINT uMsg,
 			/* this message was sent before WM_NCCREATE */
 			if (!td) return 1;
 
-			/* Minimum window size is 80x24 */
 			rc.left = rc.top = 0;
 
 			if(use_new_gmode)
 			{
-				rc.right = rc.left + 20 * td->tile_wid + td->size_ow1 + td->size_ow2;
-				rc.bottom = rc.top + 20 * td->tile_hgt + td->size_oh1 + td->size_oh2 + 1;
+				rc.right = rc.left + MIN_TERM_WIDTH_NG * td->tile_wid + td->size_ow1 + td->size_ow2;
+				rc.bottom = rc.top + MIN_TERM_HEIGHT_NG * td->tile_wid + td->size_oh1 + td->size_oh2 + 1;
 			}
 			else
 			{
-				rc.right = rc.left + 80 * td->tile_wid + td->size_ow1 + td->size_ow2;
-				rc.bottom = rc.top + 24 * td->tile_hgt + td->size_oh1 + td->size_oh2 + 1;
+				rc.right = rc.left + MIN_TERM_WIDTH * td->tile_wid + td->size_ow1 + td->size_ow2;
+				rc.bottom = rc.top + MIN_TERM_HEIGHT * td->tile_hgt + td->size_oh1 + td->size_oh2 + 1;
 			}
 
 			/* Adjust */
