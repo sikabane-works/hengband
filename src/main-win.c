@@ -1061,6 +1061,33 @@ static void term_getsize(term_data *td)
 	td->pos_y = rc.top;
 }
 
+/*
+ * Change tile size with keeping window size
+ */
+static void term_change_tile_size(term_data *td)
+{
+	RECT rc;
+
+	int wid, hgt;
+
+	/* Paranoia */
+	if (td->cols < 1) td->cols = 1;
+	if (td->rows < 1) td->rows = 1;
+
+	/* Adjust */
+	AdjustWindowRectEx(&rc, td->dwStyle, TRUE, td->dwExStyle);
+
+	/* See CreateWindowEx */
+	if (!td->w) return;
+
+	/* Extract actual location */
+	GetWindowRect(td->w, &rc);
+
+	/* Save the location */
+	td->pos_x = rc.left;
+	td->pos_y = rc.top;
+}
+
 
 /*
  * Write the "prefs" for a single term
@@ -5939,7 +5966,7 @@ static void tile_zoom_in()
 		{
 			td->tile_hgt += 2;
 			td->tile_wid += 1;
-			term_getsize(td);
+			term_change_tile_size(td);
 			term_window_resize(td);
 		}
 }
@@ -5951,7 +5978,7 @@ static void tile_zoom_out()
 		{
 			td->tile_hgt -= 2;
 			td->tile_wid -= 1;
-			term_getsize(td);
+			term_change_tile_size(td);
 			term_window_resize(td);
 		}
 }
