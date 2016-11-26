@@ -1039,10 +1039,6 @@ static void term_getsize(term_data *td)
 	rc.top = 0;
 	rc.bottom = rc.top + hgt;
 
-	/* XXX XXX XXX */
-	/* rc.right += 1; */
-	/* rc.bottom += 1; */
-
 	/* Adjust */
 	AdjustWindowRectEx(&rc, td->dwStyle, TRUE, td->dwExStyle);
 
@@ -5963,9 +5959,44 @@ static void tile_zoom_in()
 		term_data *td = &data[0];
 		if(td->tile_hgt < TILE_HEIGHT_MAX && inkey_flag && use_new_gmode)
 		{
+			uint cols;
+			uint rows;
 			td->tile_hgt += 2;
 			td->tile_wid += 1;
 			term_change_tile_size(td);
+
+			cols = (td->size_wid - td->size_ow1) / td->tile_wid;
+			rows = (td->size_hgt - td->size_oh1) / td->tile_hgt;
+
+			/* New size */
+			if ((td->cols != cols) || (td->rows != rows))
+			{
+				/* Save old term */
+				term *old_term = Term;
+
+				/* Save the new size */
+				td->cols = cols;
+				td->rows = rows;
+
+				/* Activate */
+				Term_activate(&td->t);
+
+				/* Resize the term */
+				Term_resize(td->cols, td->rows);
+
+				/* Activate */
+				Term_activate(old_term);
+
+				/* Redraw later */
+				InvalidateRect(td->w, NULL, TRUE);
+
+				/* HACK - Redraw all windows */
+				p_ptr->window = 0xFFFFFFFF;
+				window_stuff();
+			}
+
+			td->size_hack = FALSE;
+
 			term_window_resize(td);
 		}
 }
@@ -5975,9 +6006,44 @@ static void tile_zoom_out()
 		term_data *td = &data[0];
 		if(td->tile_hgt >= TILE_HEIGHT_MIN && inkey_flag && use_new_gmode)
 		{
+			uint cols;
+			uint rows;
 			td->tile_hgt -= 2;
 			td->tile_wid -= 1;
 			term_change_tile_size(td);
+
+			cols = (td->size_wid - td->size_ow1) / td->tile_wid;
+			rows = (td->size_hgt - td->size_oh1) / td->tile_hgt;
+
+			/* New size */
+			if ((td->cols != cols) || (td->rows != rows))
+			{
+				/* Save old term */
+				term *old_term = Term;
+
+				/* Save the new size */
+				td->cols = cols;
+				td->rows = rows;
+
+				/* Activate */
+				Term_activate(&td->t);
+
+				/* Resize the term */
+				Term_resize(td->cols, td->rows);
+
+				/* Activate */
+				Term_activate(old_term);
+
+				/* Redraw later */
+				InvalidateRect(td->w, NULL, TRUE);
+
+				/* HACK - Redraw all windows */
+				p_ptr->window = 0xFFFFFFFF;
+				window_stuff();
+			}
+
+			td->size_hack = FALSE;
+
 			term_window_resize(td);
 		}
 }
