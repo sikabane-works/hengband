@@ -59,6 +59,10 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>..\..\libiconv-1.9.2-1-lib\include;..\..\libxslt-1.1.26.win32\include;..\..\libxml2-2.7.8.win32\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\libiconv-1.9.2-1-lib\lib;..\..\libxslt-1.1.26.win32\lib;..\..\libxml2-2.7.8.win32\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>

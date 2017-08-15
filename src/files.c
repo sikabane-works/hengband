@@ -15,6 +15,8 @@
 
 #include "angband.h"
 
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
 
 /*
  * You may or may not want to use the following "#undef".
