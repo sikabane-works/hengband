@@ -60,8 +60,8 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\..\libxml2\include;..\..\iconv\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\libxml2\lib;..\..\iconv\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\libxml2-2.9.3\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\libxml2-2.9.3\win32\bin.msvc;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -76,7 +76,7 @@
       <DisableSpecificWarnings>4127;4996;4244;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;%(AdditionalDependencies);libxml2.a;</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;%(AdditionalDependencies);libxml2.lib;</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ShowProgress>LinkVerbose</ShowProgress>
