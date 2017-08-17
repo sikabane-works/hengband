@@ -40,6 +40,7 @@
  */
 
 #include "angband.h"
+#include "xmlfiles.h"
 
 
 
@@ -1094,6 +1095,12 @@ void do_cmd_change_name(void)
 					file_character(tmp);
 				}
 			}
+		}
+
+		/* XML File dump */
+		else if (c == 'x')
+		{
+			dumpPlayerXml();
 		}
 
 		/* Toggle mode */

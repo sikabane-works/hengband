@@ -60,8 +60,8 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\..\libiconv-1.9.2-1-lib\include;..\..\libxslt-1.1.26.win32\include;..\..\libxml2-2.7.8.win32\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\libiconv-1.9.2-1-lib\lib;..\..\libxslt-1.1.26.win32\lib;..\..\libxml2-2.7.8.win32\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\libxml2\include;..\..\iconv\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\libxml2\lib;..\..\iconv\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -76,7 +76,7 @@
       <DisableSpecificWarnings>4127;4996;4244;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;%(AdditionalDependencies);libxml2.a;</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ShowProgress>LinkVerbose</ShowProgress>
@@ -185,6 +185,7 @@
     <ClCompile Include="..\..\src\wild.c" />
     <ClCompile Include="..\..\src\wizard1.c" />
     <ClCompile Include="..\..\src\wizard2.c" />
+    <ClCompile Include="..\..\src\xmlfiles.c" />
     <ClCompile Include="..\..\src\xtra1.c" />
     <ClCompile Include="..\..\src\xtra2.c" />
     <ClCompile Include="..\..\src\z-form.c" />
@@ -211,6 +212,7 @@
     <ClInclude Include="..\..\src\rooms.h" />
     <ClInclude Include="..\..\src\streams.h" />
     <ClInclude Include="..\..\src\types.h" />
+    <ClInclude Include="..\..\src\xmlfiles.h" />
     <ClInclude Include="..\..\src\z-config.h" />
     <ClInclude Include="..\..\src\z-form.h" />
     <ClInclude Include="..\..\src\z-rand.h" />
