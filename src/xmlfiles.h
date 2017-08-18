@@ -1,1 +1,1 @@
-void dumpPlayerXml(void);
+errr dump_player_xml(cptr name);

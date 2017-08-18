@@ -1060,13 +1060,9 @@ void do_cmd_change_name(void)
 		}
 
 		/* Prompt */
-#ifdef JP
 		Term_putstr(2, 23, -1, TERM_WHITE,
-			    "['c'で名前変更, 'f'でファイルへ書出, 'h'でモード変更, ESCで終了]");
-#else
-		Term_putstr(2, 23, -1, TERM_WHITE,
-			"['c' to change name, 'f' to file, 'h' to change mode, or ESC]");
-#endif
+			_("['c'-名前変更 'f'-テキスト出力 'x'-XML 'h'-モード変更 ESC-終了]",
+				"['c'-change name 'f'-text dump 'x'-XML 'h'-change mode or ESC]"));
 
 
 		/* Query */
@@ -1100,7 +1096,14 @@ void do_cmd_change_name(void)
 		/* XML File dump */
 		else if (c == 'x')
 		{
-			dumpPlayerXml();
+			sprintf(tmp, "%s.xml", player_base);
+			if (get_string(_("ファイル名: ", "File name: "), tmp, 80))
+			{
+				if (tmp[0] && (tmp[0] != ' '))
+				{
+					dump_player_xml(tmp);
+				}
+			}
 		}
 
 		/* Toggle mode */
