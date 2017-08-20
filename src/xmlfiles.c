@@ -47,6 +47,17 @@ errr dump_player_xml(cptr name)
 	return (0);
 }
 
+static errr add_xml_element(xmlTextWriterPtr writer, cptr element_name, cptr val)
+{
+	int result;
+	result = xmlTextWriterStartElement(writer, BAD_CAST element_name);
+	if (result < 0) return 1;
+	result = xmlTextWriterWriteFormatString(writer, val, 1);
+	if (result < 0) return 1;
+	result = xmlTextWriterEndElement(writer);
+	if (result < 0) return 1;
+}
+
 static errr dump_player_xml_aux(cptr name)
 {
 	xmlTextWriterPtr writer;
@@ -60,6 +71,9 @@ static errr dump_player_xml_aux(cptr name)
 
 	result = xmlTextWriterStartElement(writer, BAD_CAST "hengband");
 	if (result < 0) return 1;
+
+	/*!< ƒvƒŒƒCƒ„[–¼ / Player Name */
+	add_xml_element(writer, "name", p_ptr->name);
 
 	result = xmlTextWriterEndElement(writer);
 	if (result < 0) return 1;
