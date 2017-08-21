@@ -1,7 +1,7 @@
 /*!
 * @file xmlfiles.c
-* @brief xml/html出力管理 / Purpose: xml/html output
-* @date 2014/01/28
+* @brief xml/html出力管理 / xml/html output
+* @date 2014/08/21
 * @author
 * <pre>
 * 2017 Deskull\n
@@ -14,7 +14,14 @@
 #include <libxml/xmlwriter.h>
 
 static errr dump_player_xml_aux(cptr name);
+static errr add_xml_element(xmlTextWriterPtr writer, cptr element_name, cptr val);
 
+
+/*!
+* @brief プレイヤー情報をXMLとしてファイルに出力する
+* @param name ファイル名
+* @return 成功したら0、失敗したらそれ以外を返す。
+*/
 errr dump_player_xml(cptr name)
 {
 	int fd = -1;
@@ -47,6 +54,13 @@ errr dump_player_xml(cptr name)
 	return (0);
 }
 
+/*!
+* @brief XMLに単純な1要素を追加する
+* @param writer libxmlによるライターポインタ
+* @param element_name 追加したい要素名。
+* @param val 要素の値。
+* @return 成功したら0、失敗したらそれ以外を返す。
+*/
 static errr add_xml_element(xmlTextWriterPtr writer, cptr element_name, cptr val)
 {
 	int result;
@@ -58,6 +72,11 @@ static errr add_xml_element(xmlTextWriterPtr writer, cptr element_name, cptr val
 	if (result < 0) return 1;
 }
 
+/*!
+* @brief プレイヤー情報をXMLとしてファイルに出力する実働サブルーチン
+* @param name ファイル名
+* @return 成功したら0、失敗したらそれ以外を返す。
+*/
 static errr dump_player_xml_aux(cptr name)
 {
 	xmlTextWriterPtr writer;
