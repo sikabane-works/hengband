@@ -39,7 +39,7 @@ jobs:
         run: make clean
 
       - name: Configure for English version
-        run: ./configure --disable-japanese
+        run: ./configure --disable-japanese --disable-worldscore
 
       - name: Build English version
         run: make -j$(nproc) 1> /dev/null
